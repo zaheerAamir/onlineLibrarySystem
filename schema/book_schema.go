@@ -1,7 +1,6 @@
 package schema
 
 type Books struct {
-	BOOK_ID            int     `json:"book_id"`
 	TITLE              string  `json:"title"`
 	AUTHORS            string  `json:"authors"`
 	AVERAGE_RATING     float64 `json:"rage_rating"`
