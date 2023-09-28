@@ -10,3 +10,9 @@ type Books struct {
 	PUBLICATION_DATE   string  `json:"publication_date"`
 	PUBLISHER          string  `json:"publisher"`
 }
+
+type Error struct {
+	CODE       int    `json:"statuscode"`
+	STATUSTEXT string `json:"statustext"`
+	MESSAGE    string `json:"message"`
+}

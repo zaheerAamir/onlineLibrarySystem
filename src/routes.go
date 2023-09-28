@@ -10,4 +10,5 @@ func Setuproutes(bookhandler *handler.BookHandler) {
 
 	http.HandleFunc("/queryCount", bookhandler.Query)
 	http.HandleFunc("/getBooks", bookhandler.GetBooks)
+	http.HandleFunc("/filterBooks", bookhandler.FilterBooks)
 }

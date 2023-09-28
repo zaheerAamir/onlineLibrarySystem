@@ -2,14 +2,12 @@ package main
 
 import (
 	"log"
+	"net/http"
 	repository "searchRecommend/repositories"
 	service "searchRecommend/services"
 	route "searchRecommend/src"
 	handler "searchRecommend/src/handlers"
 	util "searchRecommend/utils"
-
-	//"log"
-	"net/http"
 )
 
 func main() {
@@ -28,5 +26,5 @@ func main() {
 	log.Println("Server Running on Port :8080")
 	http.ListenAndServe(":8080", nil)
 
-	//Multi()
+	// Multi()
 }
