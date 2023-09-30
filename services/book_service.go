@@ -57,8 +57,10 @@ func (bookservice *BookService) FilterBooksService(query []string) []schema.Book
 
 	author := query[0]
 	publisher := query[1]
+	avg_rating := query[2]
+	num_pages := query[3]
 
-	books, err := bookservice.BookRepo.FilterBooksQuery(author, publisher)
+	books, err := bookservice.BookRepo.FilterBooksQuery(author, publisher, avg_rating, num_pages)
 	if err != nil {
 		panic(err.Error())
 	}

@@ -6,8 +6,11 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	util "searchRecommend/utils"
 	"time"
+
+	"github.com/joho/godotenv"
 )
 
 type BookQuery struct {
@@ -58,14 +61,18 @@ func Multi() {
 
 func Category() {
 
+	if err := godotenv.Load(); err != nil {
+
+		panic(err.Error())
+	}
+
 	book_name := "The Hitchhiker's Guide to the Galaxy (Hitchhiker's Guide to the Galaxy  #1)"
 	publisher := "Del Rey Books"
-	api_key := "AIzaSyAHiZDcVX77s1bM9fLakwPTOb_35QFRtdo"
 
 	URL := "https://www.googleapis.com/books/v1/volumes"
 	encoded := url.QueryEscape(book_name)
 
-	query := fmt.Sprintf("%s?key=%s&q=%s", URL, api_key, encoded)
+	query := fmt.Sprintf("%s?key=%s&q=%s", URL, os.Getenv("APi_KEY"), encoded)
 
 	res, err := http.Get(query)
 

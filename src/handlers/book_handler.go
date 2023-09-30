@@ -91,8 +91,24 @@ func (handler *BookHandler) GetBooks(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (handler *BookHandler) convJsonHelper(query []string, w http.ResponseWriter) {
+
+	books := handler.Bookservice.FilterBooksService(query)
+
+	json, err := json.Marshal(books)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	w.Header().Set("content-type", "application/json")
+	w.Write(json)
+}
+
 func (handler *BookHandler) FilterBooks(w http.ResponseWriter, r *http.Request) {
 	param := r.URL.Query()
+
+	checkAvg_rating := param.Has("avg_rating")
+	checkNum_pages := param.Has("num_pages")
 
 	author := param.Get("author")
 	publisher := param.Get("publisher")
@@ -104,7 +120,8 @@ func (handler *BookHandler) FilterBooks(w http.ResponseWriter, r *http.Request) 
 	error.STATUSTEXT = http.StatusText(error.CODE)
 	error.MESSAGE = "Parameters author and publisher name should not be empty"
 
-	if author == "" && publisher == "" {
+	if checkAvg_rating && checkNum_pages {
+		error.MESSAGE = "Cannot set both filters avg_rating and num_pages on a single param"
 		json, err := json.Marshal(error)
 		if err != nil {
 			log.Fatal(err.Error())
@@ -112,65 +129,201 @@ func (handler *BookHandler) FilterBooks(w http.ResponseWriter, r *http.Request) 
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(error.CODE)
 		w.Write(json)
-	} else if publisher == "" {
-		log.Println(author)
 
-		for i := 0; i < 2; i++ {
+	} else if author == "" && publisher == "" {
+		json, err := json.Marshal(error)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+		w.Header().Set("content-type", "application/json")
+		w.WriteHeader(error.CODE)
+		w.Write(json)
+
+	} else if publisher == "" && checkAvg_rating {
+
+		avg_rating := param.Get("avg_rating")
+
+		for i := 0; i < 4; i++ {
+
 			if i == 0 {
 				query = append(query, author)
+			} else if i == 1 {
+				query = append(query, "")
+			} else if i == 2 {
+				query = append(query, avg_rating)
+			} else {
+				query = append(query, "")
+			}
+
+		}
+
+		handler.convJsonHelper(query, w)
+
+	} else if publisher == "" && checkNum_pages {
+
+		num_pages := param.Get("num_pages")
+
+		for i := 0; i < 4; i++ {
+
+			if i == 0 {
+				query = append(query, author)
+			} else if i == 1 {
+				query = append(query, "")
+			} else if i == 2 {
+				query = append(query, "")
+			} else {
+				query = append(query, num_pages)
+			}
+
+		}
+
+		handler.convJsonHelper(query, w)
+
+	} else if publisher == "" {
+
+		log.Println(author)
+
+		for i := 0; i < 4; i++ {
+			if i == 0 {
+				query = append(query, author)
+			} else if i == 1 {
+				query = append(query, "")
+			} else if i == 2 {
+				query = append(query, "")
 			} else {
 				query = append(query, "")
 			}
 		}
-		books := handler.Bookservice.FilterBooksService(query)
 
-		json, err := json.Marshal(books)
-		if err != nil {
-			log.Fatal(err.Error())
-		}
+		handler.convJsonHelper(query, w)
 
-		w.Header().Set("content-type", "application/json")
-		w.Write(json)
+	} else if author == "" && checkAvg_rating {
 
-	} else if author == "" {
+		avg_rating := param.Get("avg_rating")
+
 		log.Println(publisher)
 
-		for i := 0; i < 2; i++ {
+		for i := 0; i < 4; i++ {
 			if i == 0 {
 				query = append(query, "")
-			} else {
+			} else if i == 1 {
 				query = append(query, publisher)
+			} else if i == 2 {
+				query = append(query, avg_rating)
+			} else {
+				query = append(query, "")
 			}
 		}
-		books := handler.Bookservice.FilterBooksService(query)
 
-		json, err := json.Marshal(books)
-		if err != nil {
-			log.Fatal(err.Error())
+		handler.convJsonHelper(query, w)
+
+	} else if author == "" && checkNum_pages {
+
+		num_pages := param.Get("num_pages")
+
+		for i := 0; i < 4; i++ {
+			if i == 0 {
+				query = append(query, "")
+			} else if i == 1 {
+				query = append(query, publisher)
+			} else if i == 2 {
+				query = append(query, "")
+			} else {
+				query = append(query, num_pages)
+			}
 		}
 
-		w.Header().Set("content-type", "application/json")
-		w.Write(json)
+		handler.convJsonHelper(query, w)
 
+	} else if author == "" {
+
+		log.Println(publisher)
+
+		for i := 0; i < 4; i++ {
+			if i == 0 {
+				query = append(query, "")
+			} else if i == 1 {
+				query = append(query, publisher)
+			} else if i == 2 {
+				query = append(query, "")
+			} else {
+				query = append(query, "")
+			}
+		}
+
+		handler.convJsonHelper(query, w)
+
+	} else if author != "" && publisher == "" && checkNum_pages {
+
+		num_pages := param.Get("num_pages")
+
+		for i := 0; i < 4; i++ {
+			if i == 0 {
+				query = append(query, author)
+			} else if i == 1 {
+				query = append(query, publisher)
+			} else if i == 2 {
+				query = append(query, "")
+			} else {
+				query = append(query, num_pages)
+			}
+		}
+
+		handler.convJsonHelper(query, w)
+
+	} else if author != "" && publisher != "" && checkAvg_rating {
+
+		avg_rating := param.Get("avg_rating")
+		log.Println(author, publisher)
+
+		for i := 0; i < 4; i++ {
+			if i == 0 {
+				query = append(query, author)
+			} else if i == 1 {
+				query = append(query, publisher)
+			} else if i == 2 {
+				query = append(query, avg_rating)
+			} else {
+				query = append(query, "")
+			}
+		}
+
+		handler.convJsonHelper(query, w)
+
+	} else if author != "" && publisher != "" && checkNum_pages {
+
+		num_pages := param.Get("num_pages")
+		log.Println(author, publisher)
+
+		for i := 0; i < 4; i++ {
+			if i == 0 {
+				query = append(query, author)
+			} else if i == 1 {
+				query = append(query, publisher)
+			} else if i == 2 {
+				query = append(query, "")
+			} else {
+				query = append(query, num_pages)
+			}
+		}
+
+		handler.convJsonHelper(query, w)
 	} else {
 		log.Println(author, publisher)
 
-		for i := 0; i < 2; i++ {
+		for i := 0; i < 4; i++ {
 			if i == 0 {
 				query = append(query, author)
-			} else {
+			} else if i == 1 {
 				query = append(query, publisher)
+			} else if i == 2 {
+				query = append(query, "")
+			} else {
+				query = append(query, "")
 			}
 		}
-		books := handler.Bookservice.FilterBooksService(query)
 
-		json, err := json.Marshal(books)
-		if err != nil {
-			log.Fatal(err.Error())
-		}
-
-		w.Header().Set("content-type", "application/json")
-		w.Write(json)
+		handler.convJsonHelper(query, w)
 	}
 
 }
