@@ -13,10 +13,10 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type BookDb struct{}
+type Db struct{}
 
 // Connect to DB
-func (bookDb *BookDb) ConnectDB() (*sql.DB, error) {
+func (bookDb *Db) ConnectDB() (*sql.DB, error) {
 
 	if err := godotenv.Load(); err != nil {
 

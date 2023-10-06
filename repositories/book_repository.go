@@ -9,12 +9,12 @@ import (
 )
 
 type BookQuery struct {
-	BookDb *util.BookDb
+	Db *util.Db
 }
 
 func (bookquery *BookQuery) QueryCount() (int, error) {
 
-	db, err := bookquery.BookDb.ConnectDB()
+	db, err := bookquery.Db.ConnectDB()
 	if err != nil {
 		panic(err)
 	}
@@ -38,7 +38,7 @@ func (bookquery *BookQuery) QueryCount() (int, error) {
 
 func (bookquery *BookQuery) GetBooksQuery(offset, limit, page_no int) ([]schema.Books, int, error) {
 
-	db, err := bookquery.BookDb.ConnectDB()
+	db, err := bookquery.Db.ConnectDB()
 	if err != nil {
 		panic(err)
 	}
@@ -47,12 +47,11 @@ func (bookquery *BookQuery) GetBooksQuery(offset, limit, page_no int) ([]schema.
 	sqlStatement := fmt.Sprintf(`
 	SELECT bookone.title, 
 	booktwo.authors, 
-	bookone.textreviewscount, 
-	booktwo.langcode, 
-	booktwo.numpages, 
+	booktwo.lang_code, 
+	booktwo.num_pages, 
 	bookthree.avg_rating, 
 	bookthree.publisher, 
-	bookthree.publishingdate FROM ((bookone INNER JOIN booktwo on bookone.bookid = booktwo.bookid) 
+	bookthree.publishing_date FROM ((bookone INNER JOIN booktwo on bookone.bookid = booktwo.bookid) 
 	INNER JOIN bookthree on bookone.bookid = bookthree.bookid)
 	OFFSET %d
 	LIMIT %d;`, offset, limit)
@@ -70,7 +69,6 @@ func (bookquery *BookQuery) GetBooksQuery(offset, limit, page_no int) ([]schema.
 		data := query.Scan(
 			&book.TITLE,
 			&book.AUTHORS,
-			&book.Text_REVIEWS_COUNT,
 			&book.LANGUAGE_CODE,
 			&book.NUM_PAGES,
 			&book.AVERAGE_RATING,
@@ -115,7 +113,6 @@ func makeQueryHelper(queryStr string, db *sql.DB, books []schema.Books) ([]schem
 		data := query.Scan(
 			&book.TITLE,
 			&book.AUTHORS,
-			&book.Text_REVIEWS_COUNT,
 			&book.LANGUAGE_CODE,
 			&book.NUM_PAGES,
 			&book.AVERAGE_RATING,
@@ -140,7 +137,7 @@ func makeQueryHelper(queryStr string, db *sql.DB, books []schema.Books) ([]schem
 
 func (bookquery *BookQuery) FilterBooksQuery(author, publisher, avg_rating, num_pages string) ([]schema.Books, error) {
 
-	db, err := bookquery.BookDb.ConnectDB()
+	db, err := bookquery.Db.ConnectDB()
 	if err != nil {
 		panic(err.Error())
 	}
@@ -151,12 +148,11 @@ func (bookquery *BookQuery) FilterBooksQuery(author, publisher, avg_rating, num_
 	SELECT 
     bookone.title, 
     booktwo.authors, 
-    bookone.textreviewscount, 
-    booktwo.langcode, 
-    booktwo.numpages, 
+    booktwo.lang_code, 
+    booktwo.num_pages, 
     bookthree.avg_rating, 
     bookthree.publisher, 
-    bookthree.publishingdate 
+    bookthree.publishing_date 
     FROM 
         bookone 
     INNER JOIN 

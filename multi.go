@@ -8,13 +8,12 @@ import (
 	"net/url"
 	"os"
 	util "searchRecommend/utils"
-	"time"
 
 	"github.com/joho/godotenv"
 )
 
 type BookQuery struct {
-	BookDb *util.BookDb
+	BookDb *util.Db
 }
 
 type GoogleBooksResponse struct {
@@ -27,14 +26,14 @@ type GoogleBooksResponse struct {
 	} `json:"items"`
 }
 
-func tasks(id int) {
+// func tasks(id int) {
 
-	log.Printf("Task %d Started\n", id)
+// 	log.Printf("Task %d Started\n", id)
 
-	time.Sleep(time.Duration(id) * time.Second)
+// 	time.Sleep(time.Duration(id) * time.Second)
 
-	log.Printf("Task %d Completed\n", id)
-}
+// 	log.Printf("Task %d Completed\n", id)
+// }
 
 func Multi() {
 

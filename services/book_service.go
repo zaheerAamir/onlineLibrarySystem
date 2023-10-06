@@ -39,7 +39,7 @@ func (bookservice *BookService) GetBooksService(limit, page_no string) ([]schema
 	}
 
 	offset := (page_noInt - 1) * limitInt
-	log.Println(offset, page_noInt, limitInt)
+	log.Println("offset:", offset, "pageNumber:", page_noInt, "limit:", limitInt)
 
 	books, dbLength, err := bookservice.BookRepo.GetBooksQuery(offset, limitInt, page_noInt)
 	if err != nil {
@@ -47,7 +47,7 @@ func (bookservice *BookService) GetBooksService(limit, page_no string) ([]schema
 	}
 
 	num_pages := math.Ceil(float64(dbLength) / float64(limitInt))
-	log.Println(num_pages)
+	log.Println("max num_pages:", num_pages)
 	log.Println(time.Since(tick))
 
 	return books, num_pages, page_noInt

@@ -1,80 +1,6 @@
 package util
 
-func task( /*Db *sql.DB, BooksStore []books*/ ) {
-
-	// tick := time.Now()
-
-	// for _, v := range BooksStore {
-
-	// 	// insert values into bookOne table:
-	// 	// sqlStatement := "INSERT INTO BookOne (bookid, title, rented, textreviewscount) VALUES ($1, $2, $3, $4)"
-	// 	// query , err := Db.Query(sqlStatement, v.BOOK_ID, v.TITLE, false, v.Text_REVIEWS_COUNT)
-
-	// 	// insert values into bookTwo table:
-
-	// 	// var Exists bool
-	// 	// err := Db.QueryRow("SELECT EXISTS(SELECT 1 FROM bookone WHERE bookid = $1)", v.BOOK_ID).Scan(&Exists)
-	// 	// if err != nil {
-	// 	// 	panic(err)
-	// 	// }
-
-	// 	// if !Exists {
-	// 	// 	log.Printf("BookId %d not exists in bookOne table\n", v.BOOK_ID)
-	// 	// } else {
-	// 	// 	sqlStatement := "INSERT INTO BookTwo (authors, langcode, numpages, bookid) VALUES ($1, $2, $3, $4)"
-
-	// 	// 	query, err := Db.Query(sqlStatement, v.AUTHORS, v.LANGUAGE_CODE, v.NUM_PAGES, v.BOOK_ID)
-
-	// 	// 	if err != nil {
-	// 	// 		panic(err.Error())
-	// 	// 	}
-
-	// 	// 	if query.Next() {
-	// 	// 		data := query.Scan()
-
-	// 	// 		if data != nil {
-	// 	// 			panic(data)
-	// 	// 		}
-	// 	// 	}
-
-	// 	// }
-
-	// 	//insert values into bookThree table:
-
-	// 	var Exists bool
-	// 	err := Db.QueryRow("SELECT EXISTS(SELECT 1 FROM bookone WHERE bookid = $1)", v.BOOK_ID).Scan(&Exists)
-	// 	if err != nil {
-	// 		panic(err)
-	// 	}
-
-	// 	if !Exists {
-	// 		log.Printf("BookId %d not exists in bookOne table\n", v.BOOK_ID)
-	// 	} else {
-	// 		sqlStatement := "INSERT INTO BookThree (publisher, publishingdate, avg_rating, bookid) VALUES ($1, $2, $3, $4)"
-
-	// 		query, err := Db.Query(sqlStatement, v.PUBLISHER, v.PUBLICATION_DATE, v.AVERAGE_RATING, v.BOOK_ID)
-
-	// 		if err != nil {
-	// 			panic(err.Error())
-	// 		}
-
-	// 		if query.Next() {
-	// 			data := query.Scan()
-
-	// 			if data != nil {
-	// 				panic(data)
-	// 			}
-	// 		}
-
-	// 	}
-
-	//}
-
-	//log.Printf("Time took: %s\n", time.Since(tick))
-
-}
-
-// func (bookService *BookService) Service() ([]books, error) {
+// func Service() ([]schema.Books, error) {
 
 // 	file, err := os.Open("books.tsv")
 // 	if err != nil {
@@ -99,7 +25,7 @@ func task( /*Db *sql.DB, BooksStore []books*/ ) {
 // 		log.Println(err.Error())
 // 	}
 
-// 	var BooksStore []books
+// 	var BooksStore []schema.Books
 
 // 	var newRecords [][]string
 // 	for i := range records {
@@ -140,8 +66,7 @@ func task( /*Db *sql.DB, BooksStore []books*/ ) {
 // 			panic(err4)
 // 		}
 
-// 		BooksStore = append(BooksStore, books{
-// 			BOOK_ID:            id,
+// 		BooksStore = append(BooksStore, schema.Books{
 // 			TITLE:              arr[1],
 // 			AUTHORS:            arr[2],
 // 			AVERAGE_RATING:     avg_rate,
@@ -156,4 +81,95 @@ func task( /*Db *sql.DB, BooksStore []books*/ ) {
 // 	log.Println(len(newRecords) == len(BooksStore))
 
 // 	return BooksStore, nil
+// }
+
+// func Task(Db *sql.DB) {
+
+// 	tick := time.Now()
+
+// 	BooksStore, err := Service()
+// 	if err != nil {
+// 		panic(err.Error())
+// 	}
+
+// 	for _, v := range BooksStore {
+
+// 		// insert values into bookOne table:
+// 		// sqlStatement := "INSERT INTO BookOne (bookid, title, rented) VALUES ($1, $2, $3)"
+// 		// query, err := Db.Query(sqlStatement, v.BOOK_ID, v.TITLE, false)
+
+// 		// if err != nil {
+// 		// 	panic(err.Error())
+// 		// }
+
+// 		// if query.Next() {
+// 		// 	data := query.Scan()
+
+// 		// 	if data != nil {
+// 		// 		panic(data)
+// 		// 	}
+// 		// }
+
+// 		// insert values into bookTwo table:
+
+// 		// var Exists bool
+// 		// err := Db.QueryRow("SELECT EXISTS(SELECT 1 FROM bookone WHERE bookid = $1)", v.BOOK_ID).Scan(&Exists)
+// 		// if err != nil {
+// 		// 	panic(err)
+// 		// }
+
+// 		// if !Exists {
+// 		// 	log.Printf("BookId %d not exists in bookOne table\n", v.BOOK_ID)
+// 		// } else {
+// 		// 	sqlStatement := "INSERT INTO BookTwo (authors, lang_code, num_pages, bookid) VALUES ($1, $2, $3, $4)"
+
+// 		// 	query, err := Db.Query(sqlStatement, v.AUTHORS, v.LANGUAGE_CODE, v.NUM_PAGES, v.BOOK_ID)
+
+// 		// 	if err != nil {
+// 		// 		panic(err.Error())
+// 		// 	}
+
+// 		// 	if query.Next() {
+// 		// 		data := query.Scan()
+
+// 		// 		if data != nil {
+// 		// 			panic(data)
+// 		// 		}
+// 		// 	}
+
+// 		// }
+
+// 		// // insert values into bookThree table:
+
+// 		var Exists bool
+// 		err := Db.QueryRow("SELECT EXISTS(SELECT 1 FROM bookone WHERE bookid = $1)", v.BOOK_ID).Scan(&Exists)
+// 		if err != nil {
+// 			panic(err)
+// 		}
+
+// 		if !Exists {
+// 			log.Printf("BookId %d not exists in bookOne table\n", v.BOOK_ID)
+// 		} else {
+// 			sqlStatement := "INSERT INTO BookThree (publisher, publishing_date, avg_rating, bookid) VALUES ($1, $2, $3, $4)"
+
+// 			query, err := Db.Query(sqlStatement, v.PUBLISHER, v.PUBLICATION_DATE, v.AVERAGE_RATING, v.BOOK_ID)
+
+// 			if err != nil {
+// 				panic(err.Error())
+// 			}
+
+// 			if query.Next() {
+// 				data := query.Scan()
+
+// 				if data != nil {
+// 					panic(data)
+// 				}
+// 			}
+
+// 		}
+
+// 	}
+
+// 	log.Printf("Time took: %s\n", time.Since(tick))
+
 // }
