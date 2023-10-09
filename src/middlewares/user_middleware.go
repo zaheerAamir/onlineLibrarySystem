@@ -123,3 +123,60 @@ func Login(next http.HandlerFunc) http.HandlerFunc {
 	})
 
 }
+
+func Logout(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		var error schema.Error
+		error.CODE = 400
+		error.STATUSTEXT = http.StatusText(400)
+		error.MESSAGE = "Bad request it is a DELETE route"
+
+		if r.Method != "DELETE" {
+			json, err := json.Marshal(error)
+			if err != nil {
+				panic(err.Error())
+			}
+			w.WriteHeader(error.CODE)
+			w.Header().Set("content-type", "application/json")
+			w.Write(json)
+		} else if r.Header.Get("Content-Type") != "application/json" {
+			error.MESSAGE = "Content-Type should be application/json"
+			json, err := json.Marshal(error)
+			if err != nil {
+				panic(err.Error())
+			}
+			w.WriteHeader(error.CODE)
+			w.Header().Set("content-type", "application/json")
+			w.Write(json)
+
+		} else {
+
+			body, err := io.ReadAll(r.Body)
+			if err != nil {
+				panic(err.Error())
+			}
+			var email schema.Logout
+			if err1 := json.Unmarshal(body, &email); err1 != nil {
+				panic(err1.Error())
+			}
+			log.Println(email.EMAIL)
+
+			if email.EMAIL == "" {
+				error.MESSAGE = "Please Enter the email Id"
+				json, err := json.Marshal(error)
+				if err != nil {
+					panic(err.Error())
+				}
+				w.WriteHeader(error.CODE)
+				w.Header().Set("content-type", "application/json")
+				w.Write(json)
+			} else {
+				r.Body = io.NopCloser(bytes.NewBuffer(body))
+				next.ServeHTTP(w, r)
+			}
+
+		}
+
+	}
+}

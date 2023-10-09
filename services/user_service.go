@@ -7,10 +7,15 @@ import (
 	"log"
 	"math/big"
 	"net/http"
+	"os"
 	repository "searchRecommend/repositories"
 	"searchRecommend/schema"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/dgrijalva/jwt-go"
+	"github.com/joho/godotenv"
 )
 
 type UserService struct {
@@ -97,4 +102,103 @@ func (userservice *UserService) LoginUserService(user schema.UserLoginDto) (bool
 	log.Println("User does not exists")
 	return false, error
 
+}
+
+func (userservice *UserService) CreateJWT(email string) (string, string, error) {
+	if err := godotenv.Load(); err != nil {
+
+		panic(err.Error())
+	}
+
+	accessSecret := os.Getenv("ACCES_TOKEN_SECRET")
+	refreshSecret := os.Getenv("REFRESH_TOKEN_SECRET")
+
+	admin := userservice.UserRepo.CreateJWTQuery(email)
+
+	accessTokenClaims := jwt.MapClaims{
+		"exp":  time.Now().Add(time.Minute).Unix(), // Token will expire in 1 minute
+		"iat":  time.Now().Unix(),
+		"role": admin,
+		// Add other claims as needed
+	}
+
+	refreshTokenClaims := jwt.MapClaims{
+		"iat":  time.Now().Unix(),
+		"role": admin,
+	}
+
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessTokenClaims)
+	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshTokenClaims)
+
+	accessTokeStr, err := accessToken.SignedString([]byte(accessSecret))
+	if err != nil {
+		panic(err.Error())
+	}
+
+	refreshTokenStr, err1 := refreshToken.SignedString([]byte(refreshSecret))
+	if err1 != nil {
+		panic(err1.Error())
+	}
+	userservice.UserRepo.StoreRefreshTokenQuery(refreshTokenStr, email)
+
+	return accessTokeStr, refreshTokenStr, nil
+}
+
+func (userservice *UserService) RefreshTokenService(token string) (bool, string) {
+
+	log.Println("token:", token)
+	check := userservice.UserRepo.RefreshTokenQuery(token)
+
+	log.Println("Service:", check)
+	if !check {
+		return check, ""
+	}
+	if err := godotenv.Load(); err != nil {
+
+		panic(err.Error())
+	}
+
+	secret := os.Getenv("REFRESH_TOKEN_SECRET")
+
+	checkToken, errr := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
+		_, ok := t.Method.(*jwt.SigningMethodHMAC)
+		if !ok {
+			log.Println("Incorrect Token!")
+		}
+		return []byte(secret), nil
+	})
+	if errr != nil {
+		panic(errr.Error())
+	}
+
+	var accessTokeStr string
+	var err1 error
+	if checkToken.Valid {
+
+		accessSecret := os.Getenv("ACCES_TOKEN_SECRET")
+
+		role := checkToken.Claims.(jwt.MapClaims)["role"].(bool)
+		accessTokenClaims := jwt.MapClaims{
+			"exp":  time.Now().Add(time.Minute).Unix(), // Token will expire in 1 minute
+			"iat":  time.Now().Unix(),
+			"role": role,
+			// Add other claims as needed
+		}
+
+		accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessTokenClaims)
+
+		accessTokeStr, err1 = accessToken.SignedString([]byte(accessSecret))
+		if err1 != nil {
+			panic(err1.Error())
+		}
+
+	}
+	return true, accessTokeStr
+
+}
+
+func (userservice *UserService) LogoutService(email string) bool {
+
+	check := userservice.UserRepo.LogoutQuery(email)
+	return check
 }

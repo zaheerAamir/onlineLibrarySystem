@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"log"
 	"searchRecommend/schema"
 	util "searchRecommend/utils"
 )
@@ -102,4 +103,124 @@ func (userquery *UserRepository) LoginUserQuery(userLoginCred schema.UserLoginDt
 
 	return hasshPass, salt
 
+}
+
+func (userquery *UserRepository) CreateJWTQuery(email string) bool {
+
+	db, err := userquery.Db.ConnectDB()
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
+
+	getUserRole := fmt.Sprintf("SELECT admin FROM users WHERE email = '%s';", email)
+	query, err1 := db.Query(getUserRole)
+	if err1 != nil {
+		panic(err1.Error())
+	}
+
+	var roleAdmin bool
+	if query.Next() {
+		data := query.Scan(
+			&roleAdmin,
+		)
+
+		if data != nil {
+			panic(data.Error())
+		}
+	}
+	return roleAdmin
+}
+
+func (userquery *UserRepository) StoreRefreshTokenQuery(refreshToken, email string) {
+
+	db, err := userquery.Db.ConnectDB()
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
+
+	log.Println(refreshToken)
+	log.Println(email)
+	setRefreshToken := fmt.Sprintf("UPDATE users SET refresh_token = '%s' WHERE email = '%s';", refreshToken, email)
+	log.Println(setRefreshToken)
+	query, err1 := db.Query(setRefreshToken)
+	if err1 != nil {
+		panic(err1.Error())
+	}
+
+	if query.Next() {
+		data := query.Scan()
+		if data != nil {
+			panic(data.Error())
+		}
+	}
+}
+
+func (userquery *UserRepository) RefreshTokenQuery(token string) bool {
+
+	db, err := userquery.Db.ConnectDB()
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
+
+	checkRefrehToken := fmt.Sprintf("SELECT COUNT(*) FROM users WHERE refresh_token = '%s';", token)
+	query, err1 := db.Query(checkRefrehToken)
+	if err1 != nil {
+		panic(err1.Error())
+	}
+
+	var count int
+	if query.Next() {
+		data := query.Scan(&count)
+		if data != nil {
+			panic(data.Error())
+		}
+	}
+
+	if count == 0 {
+		return false
+	}
+	return true
+}
+
+func (userquery *UserRepository) LogoutQuery(email string) bool {
+
+	db, err := userquery.Db.ConnectDB()
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
+
+	checkEmail := fmt.Sprintf("SELECT COUNT(*) FROM users WHERE email = '%s';", email)
+	query, err1 := db.Query(checkEmail)
+	if err1 != nil {
+		panic(err1.Error())
+	}
+
+	var count int
+	if query.Next() {
+		data := query.Scan(&count)
+		if data != nil {
+			panic(data.Error())
+		}
+	}
+
+	if count != 0 {
+		deleteToken := fmt.Sprintf("UPDATE users SET refresh_token = '' WHERE email = '%s';", email)
+		query1, err2 := db.Query(deleteToken)
+		if err2 != nil {
+			panic(err2.Error())
+		}
+
+		if query1.Next() {
+			data := query.Scan(&count)
+			if data != nil {
+				panic(data.Error())
+			}
+		}
+		return true
+	}
+	return false
 }

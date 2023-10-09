@@ -20,3 +20,22 @@ type UserLoginDto struct {
 	EMAIL    string `json:"email"`
 	PASSWORD string `json:"password"`
 }
+
+type UserSucces struct {
+	CODE          int    `json:"status_code"`
+	TEXT          string `json:"text"`
+	ACCES_TOKEN   string `json:"access_token"`
+	REFRESH_TOKEN string `json:"refresh_toke"`
+}
+
+type RefreshTokenDTO struct {
+	REFRESH_TOKEN string `json:"token"`
+}
+
+type AccessTokenSchema struct {
+	AccessToken string `json:"access_token"`
+}
+
+type Logout struct {
+	EMAIL string `json:"email"`
+}
