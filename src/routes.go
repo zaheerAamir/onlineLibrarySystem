@@ -17,9 +17,9 @@ func Setuproutes(bookhandler *handler.BookHandler,
 }
 
 func bookRoutes(bookhandler *handler.BookHandler) {
-	http.HandleFunc("/queryCount", middlewares.LoggerMiddleware(bookhandler.Query))
-	http.HandleFunc("/getBooks", middlewares.LoggerMiddleware(bookhandler.GetBooks))
-	http.HandleFunc("/filterBooks", middlewares.LoggerMiddleware(bookhandler.FilterBooks))
+	http.HandleFunc("/queryCount", middlewares.LoggerMiddleware(middlewares.AuthorizeUser(bookhandler.Query)))
+	http.HandleFunc("/getBooks", middlewares.LoggerMiddleware(middlewares.AuthorizeUser(bookhandler.GetBooks)))
+	http.HandleFunc("/filterBooks", middlewares.LoggerMiddleware(middlewares.AuthorizeUser(bookhandler.FilterBooks)))
 
 }
 
@@ -27,10 +27,13 @@ func userRoutes(userhandler *handler.UserHandler) {
 
 	http.HandleFunc("/createUser", middlewares.LoggerMiddleware(middlewares.SetContentType(middlewares.SignUp(userhandler.CreateUserHandler))))
 	http.HandleFunc("/login", middlewares.LoggerMiddleware(middlewares.SetContentType(middlewares.Login(userhandler.LoginUserHandler))))
+
+	http.HandleFunc("/token", middlewares.LoggerMiddleware(middlewares.SetContentType(middlewares.CreateToken(userhandler.RefreshTokenHandler))))
+	http.HandleFunc("/logout", middlewares.LoggerMiddleware(middlewares.SetContentType(middlewares.Logout(userhandler.LogoutHandler))))
 }
 
 func rentBookRoutes(rentbookhander *handler.RentBookHandler) {
 
-	http.HandleFunc("/rentBook/", middlewares.LoggerMiddleware(middlewares.SetContentType(middlewares.RentBook(rentbookhander.RentbookHandler))))
-	http.HandleFunc("/giveBookBack", middlewares.LoggerMiddleware(middlewares.SetContentType(middlewares.GiveBack(rentbookhander.GiveBookBackHandler))))
+	http.HandleFunc("/rentBook/", middlewares.LoggerMiddleware(middlewares.SetContentType(middlewares.AuthorizeUser(middlewares.RentBook(rentbookhander.RentbookHandler)))))
+	http.HandleFunc("/giveBookBack", middlewares.LoggerMiddleware(middlewares.SetContentType(middlewares.AuthorizeAdmin(middlewares.GiveBack(rentbookhander.GiveBookBackHandler)))))
 }
