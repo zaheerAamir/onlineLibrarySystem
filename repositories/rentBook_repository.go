@@ -136,15 +136,22 @@ func (rentbookquery *RentBookRepo) GiveBookBackRepo(req schema.GiveBookBackDTO) 
 		}
 		log.Println(countArr)
 
-		for _, v := range countArr {
-			if req.BOOK_ID != v {
-				error.CODE = 404
-				error.STATUSTEXT = http.StatusText(error.CODE)
-				error.MESSAGE = "Book not rented!"
-				return error
+		if len(countArr) == 0 {
+			error.CODE = 404
+			error.STATUSTEXT = http.StatusText(error.CODE)
+			error.MESSAGE = "No Books Rented by this User!"
+			return error
 
-			} else {
-				getUserRentedBooks := fmt.Sprintf(`UPDATE bookone
+		} else {
+			for _, v := range countArr {
+				if req.BOOK_ID != v {
+					error.CODE = 404
+					error.STATUSTEXT = http.StatusText(error.CODE)
+					error.MESSAGE = "Book not rented!"
+					return error
+
+				} else {
+					getUserRentedBooks := fmt.Sprintf(`UPDATE bookone
 		        SET
 		            rented = false,
 		            userid = NULL,
@@ -156,20 +163,21 @@ func (rentbookquery *RentBookRepo) GiveBookBackRepo(req schema.GiveBookBackDTO) 
 		            bookid = %d;
 		        `, user_id, req.BOOK_ID)
 
-				query1, err2 := db.Query(getUserRentedBooks)
-				if err2 != nil {
-					panic(err2.Error())
-				}
-
-				if query1.Next() {
-					data := query1.Scan()
-					if data != nil {
-						panic(data.Error())
+					query1, err2 := db.Query(getUserRentedBooks)
+					if err2 != nil {
+						panic(err2.Error())
 					}
-				}
-				break
-			}
 
+					if query1.Next() {
+						data := query1.Scan()
+						if data != nil {
+							panic(data.Error())
+						}
+					}
+					break
+				}
+
+			}
 		}
 
 		return error

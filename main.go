@@ -30,6 +30,14 @@ func main() {
 	point := &foo
 	val := *point
 	log.Println(foo, point, val)
+	//TOKEN SECRET
+	// salt := make([]byte, 64)
+	// _, err := rand.Read(salt)
+	// if err != nil {
+	// 	panic(err.Error())
+	// }
+	// sendemail := &job.SendEmail{Db: DB}
+	// sendemail.CheckUsers()
 
 	route.Setuproutes(bookHandler, userHandler, rentBookHandler)
 
@@ -39,6 +47,7 @@ func main() {
 	// 	panic(err)
 	// }
 	// util.Task(sql)
+	// log.Println(hex.EncodeToString(salt))
 
 	log.Println("Server Running on Port :8080")
 	http.ListenAndServe(":8080", nil)

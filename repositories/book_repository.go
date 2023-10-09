@@ -156,9 +156,13 @@ func (bookquery *BookQuery) FilterBooksQuery(author, publisher, avg_rating, num_
     FROM 
         bookone 
     INNER JOIN 
-        booktwo ON bookone.bookid = booktwo.bookid
+        booktwo 
+	ON 
+	    bookone.bookid = booktwo.bookid
     INNER JOIN 
-        bookthree ON bookone.bookid = bookthree.bookid
+        bookthree 
+	ON 
+	    bookone.bookid = bookthree.bookid
     `
 	var books []schema.Books
 
