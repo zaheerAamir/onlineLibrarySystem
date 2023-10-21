@@ -1,12 +1,10 @@
 FROM golang:1.21.1
 
-WORKDIR /go/src/
+WORKDIR /searchRecommend/auth 
 
-COPY go.mod /go/src/ 
-COPY go.sum /go/src/
+COPY go.mod /searchRecommend/ 
+COPY go.sum /searchRecommend/ 
+
+COPY auth /searchRecommend/auth/ 
 
 RUN go mod tidy
-
-COPY . /go/src/
-
-EXPOSE 9091

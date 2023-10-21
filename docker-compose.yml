@@ -1,34 +1,58 @@
 version: '3.0'
 
 services:
-  booksservice: 
-    build:
-      context: ./books
-      dockerfile: Dockerfile
+  booksservice:
+    build: 
+      context: .
+      dockerfile: books/Dockerfile
     ports:
-      - "8080:9090"
+      - "8080:8080"
     environment:
-      - DB_USER="${DB_USER}"
-      - DB_NAME="${DB_NAME}"
-      - DB_PASSWORD="${DB_PASSWORD}"
-      - POSTGRES_CONTAINER_ID="${POSTGRES_CONTAINER_ID}"
-      - API_KEY="${API_KEY}"
-      - ACCESS_TOKEN_SECRET="${ACCESS_TOKEN_SECRET}"
-      - REFRESH_TOKEN_SECRET="${REFRESH_TOKEN_SECRET}"
-    command: go run books/main.go -b 0.0.0.0
+      - DB_USER=${DB_USER}
+      - DB_NAME=${DB_NAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_CONTAINER_ID=${POSTGRES_CONTAINER_ID}
+      - API_KEY=${API_KEY}
+      - ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
+      - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
+    command: go run main.go -b 0.0.0.0
+    networks:
+      - bridge
 
   authservice:
-    build:
-      context: ./auth
-      dockerfile: Dockerfile
+    build: 
+      context: .
+      dockerfile: auth/Dockerfile
     ports:
-      - "8081:9091"
+      - "8081:8081"
     environment:
-      - DB_USER="${DB_USER}"
-      - DB_NAME="${DB_NAME}"
-      - DB_PASSWORD="${DB_PASSWORD}"
-      - POSTGRES_CONTAINER_ID="${POSTGRES_CONTAINER_ID}"
-      - API_KEY="${API_KEY}"
-      - ACCESS_TOKEN_SECRET="${ACCESS_TOKEN_SECRET}"
-      - REFRESH_TOKEN_SECRET="${REFRESH_TOKEN_SECRET}"
-    command: go run auth/main.go -b 0.0.0.0
+      - DB_USER=${DB_USER}
+      - DB_NAME=${DB_NAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_CONTAINER_ID=${POSTGRES_CONTAINER_ID}
+      - API_KEY=${API_KEY}
+      - ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
+      - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
+    command: go run main.go -b 0.0.0.0
+    networks:
+      - bridge
+
+  postgres:
+    image: postgres
+    container_name: DB_Container
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_NAME=${DB_NAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    networks:
+      - bridge
+
+networks:
+  bridge: 
+
+volumes:
+  postgres_data:

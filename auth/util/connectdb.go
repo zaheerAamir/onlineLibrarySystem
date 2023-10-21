@@ -25,7 +25,7 @@ func (bookDb *Db) ConnectDB() (*sql.DB, error) {
 			panic(errr.Error())
 		}
 	}
-	connStr := fmt.Sprintf("user=%s dbname=%s password=%s sslmode=disable",
+	connStr := fmt.Sprintf("host=postgres user=%s dbname=%s password=%s sslmode=disable",
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_NAME"),
 		os.Getenv("DB_PASSWORD"),
