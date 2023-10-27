@@ -1,0 +1,198 @@
+definitions:
+  schema.Books:
+    properties:
+      authors:
+        type: string
+      language_code:
+        type: string
+      num_pages:
+        type: integer
+      publication_date:
+        type: string
+      publisher:
+        type: string
+      rage_rating:
+        type: number
+      text_reviews_count:
+        type: integer
+      title:
+        type: string
+    type: object
+  schema.Error:
+    properties:
+      message:
+        type: string
+      statuscode:
+        type: integer
+      statustext:
+        type: string
+    type: object
+  schema.GiveBookBackDTO:
+    properties:
+      book_id:
+        type: integer
+      email:
+        type: string
+    type: object
+  schema.RentBookDTO:
+    properties:
+      rentDuration:
+        properties:
+          days:
+            type: integer
+          months:
+            type: integer
+        type: object
+    type: object
+  schema.RentBookSuccess:
+    properties:
+      message:
+        type: string
+      status_code:
+        type: integer
+      status_text:
+        type: string
+    type: object
+info:
+  contact:
+    email: aamirzaheer95@gmail.com
+    name: Aamir Zaheer
+  title: Books Api
+  version: "1"
+paths:
+  /filterBooks:
+    get:
+      description: User can filter books author or publisher name also sort books
+        by number of pages or average rating
+      parameters:
+      - description: Author name to filter by
+        in: query
+        name: author
+        type: string
+      - description: Publisher name to filter by
+        in: query
+        name: publisher
+        type: string
+      - description: Sort by average rating ASC or DESC
+        in: query
+        name: avg_rating
+        type: string
+      - description: Sort by number of pages ASC or DESC
+        in: query
+        name: num_pages
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schema.Books'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schema.Error'
+      security:
+      - bearerToken: []
+      summary: FilterBooks user route
+      tags:
+      - books
+  /getBooks:
+    get:
+      description: User can get the list of books with pagination
+      parameters:
+      - description: Page number (default 1)
+        in: query
+        name: page_no
+        required: true
+        type: integer
+      - description: Number of itmes per page (default 10)
+        in: query
+        name: limit
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schema.Books'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schema.Error'
+      security:
+      - bearerToken: []
+      summary: GetBooks user route
+      tags:
+      - books
+  /giveBookBack:
+    put:
+      consumes:
+      - application/json
+      description: User can give the rented book back to the admin and admin can update
+        the user rent details
+      parameters:
+      - description: Request body in JSON format
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/schema.GiveBookBackDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schema.RentBookSuccess'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/schema.Error'
+      security:
+      - bearerToken: []
+      summary: Give Book back route
+      tags:
+      - books
+  /rentBook/{id}:
+    post:
+      consumes:
+      - application/json
+      description: User can rent a book for a period of time
+      parameters:
+      - description: ID of the book to rent
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Request body in JSON format
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/schema.RentBookDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schema.RentBookSuccess'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/schema.Error'
+      security:
+      - bearerToken: []
+      summary: RentBook route
+      tags:
+      - books
+securityDefinitions:
+  bearerToken:
+    description: Enter your access_token in the form of <b>Bearer &lt;access_token&gt;</b>
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
