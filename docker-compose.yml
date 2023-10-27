@@ -1,6 +1,22 @@
 version: '3.0'
 
 services:
+  nginx:
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile 
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - booksservice
+      - authservice
+      - postgres
+    networks:
+      - bridge
+    command: /bin/bash -c "cd /usr/src/app && ./wait-for-it.sh -t 60 booksservice:8080 && ./wait-for-it.sh -t 60 authservice:8081 && nginx -g 'daemon off;'" 
+
   booksservice:
     build: 
       context: .
