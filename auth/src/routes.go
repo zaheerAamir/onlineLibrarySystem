@@ -12,5 +12,5 @@ func SetupRoutes(userhandler *handler.UserHandler) {
 	http.HandleFunc("/login", middlewares.LoggerMiddleware(middlewares.SetContentType(middlewares.Login(userhandler.LoginUserHandler))))
 
 	http.HandleFunc("/token", middlewares.LoggerMiddleware(middlewares.SetContentType(middlewares.CreateToken(userhandler.RefreshTokenHandler))))
-	http.HandleFunc("/logout", middlewares.LoggerMiddleware(middlewares.SetContentType(middlewares.Logout(userhandler.LogoutHandler))))
+	http.HandleFunc("/logout", middlewares.LoggerMiddleware(middlewares.SetContentType(middlewares.AuthorizeUser(userhandler.LogoutHandler))))
 }
