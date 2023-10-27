@@ -1,0 +1,163 @@
+definitions:
+  schema.AccessTokenSchema:
+    properties:
+      access_token:
+        type: string
+    type: object
+  schema.Error:
+    properties:
+      message:
+        type: string
+      statuscode:
+        type: integer
+      statustext:
+        type: string
+    type: object
+  schema.RefreshTokenDTO:
+    properties:
+      token:
+        type: string
+    type: object
+  schema.UserDto:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        type: string
+    type: object
+  schema.UserLoginDto:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  schema.UserLoginSuccess:
+    properties:
+      access_token:
+        type: string
+      refresh_toke:
+        type: string
+      status_code:
+        type: integer
+      text:
+        type: string
+    type: object
+  schema.UserSuccess:
+    properties:
+      message:
+        type: string
+      status_code:
+        type: integer
+      text:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /createUser:
+    post:
+      consumes:
+      - application/json
+      description: User can create Account
+      parameters:
+      - description: Request body in JSON format
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/schema.UserDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/schema.UserSuccess'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/schema.Error'
+      summary: SignUp user route
+      tags:
+      - users
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: User can Login to their Account
+      parameters:
+      - description: Request body in JSON format
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/schema.UserLoginDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schema.UserLoginSuccess'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/schema.Error'
+      summary: Login user route
+      tags:
+      - users
+  /logout:
+    delete:
+      description: User can Logout of their Account
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/schema.Error'
+      security:
+      - bearerToken: []
+      summary: Logout user route
+      tags:
+      - users
+  /token:
+    post:
+      consumes:
+      - application/json
+      description: User can Refresh the expired Access token from the Refresh token
+      parameters:
+      - description: Request body in JSON format
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/schema.RefreshTokenDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schema.AccessTokenSchema'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/schema.Error'
+      summary: Refresh Access token route
+      tags:
+      - users
+securityDefinitions:
+  bearerToken:
+    description: Enter your access_token in the form of <b>Bearer &lt;access_token&gt;</b>
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
