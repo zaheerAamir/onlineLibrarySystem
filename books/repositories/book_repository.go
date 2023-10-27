@@ -190,7 +190,7 @@ func (bookquery *BookQuery) FilterBooksQuery(author, publisher, avg_rating, num_
 		WHERE 
 		    booktwo.authors LIKE '%%%s%%' 
 		AND 
-		    bookthree.publisher = '%s' ORDER BY booktwo.numpages %s`,
+		    bookthree.publisher = '%s' ORDER BY booktwo.num_pages %s`,
 			sqlStatement, author, publisher, num_pages)
 
 		log.Println(joinAuthorANDPublisherNum)
@@ -222,7 +222,7 @@ func (bookquery *BookQuery) FilterBooksQuery(author, publisher, avg_rating, num_
 
 	} else if author != "" && publisher == "" && num_pages != "" {
 
-		joinAuthorNum := fmt.Sprintf(`%s WHERE booktwo.authors LIKE '%%%s%%' ORDER BY booktwo.numpages %s`, sqlStatement, author, num_pages)
+		joinAuthorNum := fmt.Sprintf(`%s WHERE booktwo.authors LIKE '%%%s%%' ORDER BY booktwo.num_pages %s`, sqlStatement, author, num_pages)
 
 		log.Println(joinAuthorNum)
 
@@ -255,7 +255,7 @@ func (bookquery *BookQuery) FilterBooksQuery(author, publisher, avg_rating, num_
 
 	} else if publisher != "" && author == "" && num_pages != "" {
 
-		joinPublisherNum := fmt.Sprintf(`%s WHERE bookthree.publisher = '%s' ORDER BY booktwo.numpages %s`, sqlStatement, publisher, num_pages)
+		joinPublisherNum := fmt.Sprintf(`%s WHERE bookthree.publisher = '%s' ORDER BY booktwo.num_pages %s`, sqlStatement, publisher, num_pages)
 
 		log.Println(joinPublisherNum)
 

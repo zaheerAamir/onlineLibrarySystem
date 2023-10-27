@@ -6,24 +6,32 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"regexp"
 	"searchRecommend/auth/schema"
 )
+
+func isGmailAddress(email string) bool {
+	// Define a regular expression pattern for Gmail addresses
+	pattern := `^[a-zA-Z0-9._%+-]+@gmail\.com$`
+	re := regexp.MustCompile(pattern)
+	return re.MatchString(email)
+}
 
 func SignUp(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
+		w.Header().Set("content-type", "application/json")
 		var error schema.Error
 		error.CODE = 400
 		error.STATUSTEXT = http.StatusText(400)
 		error.MESSAGE = "Bad request it is a POST route"
 
-		if r.Method != "POST" {
+		if r.Method != http.MethodPost {
 			json, err := json.Marshal(error)
 			if err != nil {
 				panic(err.Error())
 			}
 			w.WriteHeader(error.CODE)
-			w.Header().Set("content-type", "application/json")
 			w.Write(json)
 		} else if r.Header.Get("Content-Type") != "application/json" {
 			error.MESSAGE = "Content-Type should be application/json"
@@ -32,7 +40,6 @@ func SignUp(next http.HandlerFunc) http.HandlerFunc {
 				panic(err.Error())
 			}
 			w.WriteHeader(error.CODE)
-			w.Header().Set("content-type", "application/json")
 			w.Write(json)
 
 		} else {
@@ -54,10 +61,18 @@ func SignUp(next http.HandlerFunc) http.HandlerFunc {
 					panic(err.Error())
 				}
 				w.WriteHeader(error.CODE)
-				w.Header().Set("content-type", "application/json")
 				w.Write(json)
+			} else if !isGmailAddress(data.EMAIL) {
+				error.MESSAGE = "Given Gmail ID is not a Gmail address!"
+				json, err := json.Marshal(error)
+				if err != nil {
+					panic(err.Error())
+				}
+				w.WriteHeader(error.CODE)
+				w.Write(json)
+
 			} else {
-				log.Println(data)
+				log.Println("[User Middleware] [SignUp route]", data)
 				r.Body = io.NopCloser(bytes.NewBuffer(body))
 				next.ServeHTTP(w, r)
 			}
@@ -69,18 +84,19 @@ func SignUp(next http.HandlerFunc) http.HandlerFunc {
 
 func Login(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		w.Header().Set("content-type", "application/json")
 		var error schema.Error
 		error.CODE = 400
 		error.STATUSTEXT = http.StatusText(400)
-		error.MESSAGE = "Bad request it is a GET route"
+		error.MESSAGE = "Bad request it is a POST route"
 
-		if r.Method != "GET" {
+		if r.Method != http.MethodPost {
 			json, err := json.Marshal(error)
 			if err != nil {
 				panic(err.Error())
 			}
 			w.WriteHeader(error.CODE)
-			w.Header().Set("content-type", "application/json")
 			w.Write(json)
 		} else if r.Header.Get("Content-Type") != "application/json" {
 			error.MESSAGE = "Content-Type should be application/json"
@@ -89,7 +105,6 @@ func Login(next http.HandlerFunc) http.HandlerFunc {
 				panic(err.Error())
 			}
 			w.WriteHeader(error.CODE)
-			w.Header().Set("content-type", "application/json")
 			w.Write(json)
 
 		} else {
@@ -111,10 +126,9 @@ func Login(next http.HandlerFunc) http.HandlerFunc {
 					panic(err.Error())
 				}
 				w.WriteHeader(error.CODE)
-				w.Header().Set("content-type", "application/json")
 				w.Write(json)
 			} else {
-				log.Println(data)
+				log.Println("[User Middleware] [Login route]", data)
 				r.Body = io.NopCloser(bytes.NewBuffer(body))
 				next.ServeHTTP(w, r)
 			}
@@ -122,61 +136,4 @@ func Login(next http.HandlerFunc) http.HandlerFunc {
 
 	})
 
-}
-
-func Logout(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-
-		var error schema.Error
-		error.CODE = 400
-		error.STATUSTEXT = http.StatusText(400)
-		error.MESSAGE = "Bad request it is a DELETE route"
-
-		if r.Method != "DELETE" {
-			json, err := json.Marshal(error)
-			if err != nil {
-				panic(err.Error())
-			}
-			w.WriteHeader(error.CODE)
-			w.Header().Set("content-type", "application/json")
-			w.Write(json)
-		} else if r.Header.Get("Content-Type") != "application/json" {
-			error.MESSAGE = "Content-Type should be application/json"
-			json, err := json.Marshal(error)
-			if err != nil {
-				panic(err.Error())
-			}
-			w.WriteHeader(error.CODE)
-			w.Header().Set("content-type", "application/json")
-			w.Write(json)
-
-		} else {
-
-			body, err := io.ReadAll(r.Body)
-			if err != nil {
-				panic(err.Error())
-			}
-			var email schema.Logout
-			if err1 := json.Unmarshal(body, &email); err1 != nil {
-				panic(err1.Error())
-			}
-			log.Println(email.EMAIL)
-
-			if email.EMAIL == "" {
-				error.MESSAGE = "Please Enter the email Id"
-				json, err := json.Marshal(error)
-				if err != nil {
-					panic(err.Error())
-				}
-				w.WriteHeader(error.CODE)
-				w.Header().Set("content-type", "application/json")
-				w.Write(json)
-			} else {
-				r.Body = io.NopCloser(bytes.NewBuffer(body))
-				next.ServeHTTP(w, r)
-			}
-
-		}
-
-	}
 }

@@ -10,18 +10,18 @@ import (
 
 func RentBook(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("content-type", "application/json")
 		var error schema.Error
 		error.CODE = 400
 		error.STATUSTEXT = http.StatusText(400)
 		error.MESSAGE = "Bad request it is a POST route"
 
-		if r.Method != "POST" {
+		if r.Method != http.MethodPost {
 			json, err := json.Marshal(error)
 			if err != nil {
 				panic(err.Error())
 			}
 			w.WriteHeader(error.CODE)
-			w.Header().Set("content-type", "application/json")
 			w.Write(json)
 		} else if r.Header.Get("Content-Type") != "application/json" {
 			error.MESSAGE = "Content-Type should be application/json"
@@ -30,7 +30,6 @@ func RentBook(next http.HandlerFunc) http.HandlerFunc {
 				panic(err.Error())
 			}
 			w.WriteHeader(error.CODE)
-			w.Header().Set("content-type", "application/json")
 			w.Write(json)
 
 		} else {
@@ -44,25 +43,14 @@ func RentBook(next http.HandlerFunc) http.HandlerFunc {
 			if err1 := json.Unmarshal(body, &duration); err1 != nil {
 				panic(err1.Error())
 			}
-			if duration.USER_ID == 0 {
-				error.CODE = 404
-				error.STATUSTEXT = http.StatusText(error.CODE)
-				error.MESSAGE = "Unauthorized user!"
-				json, err := json.Marshal(error)
-				if err != nil {
-					panic(err.Error())
-				}
-				w.WriteHeader(error.CODE)
-				w.Header().Set("content-type", "application/json")
-				w.Write(json)
-			} else if duration.RENTDURATION.DAYS == 0 && duration.RENTDURATION.MONTHS == 0 {
+
+			if duration.RENTDURATION.DAYS == 0 && duration.RENTDURATION.MONTHS == 0 {
 				error.MESSAGE = "Please enter anyone field days or month"
 				json, err := json.Marshal(error)
 				if err != nil {
 					panic(err.Error())
 				}
 				w.WriteHeader(error.CODE)
-				w.Header().Set("content-type", "application/json")
 				w.Write(json)
 			} else if duration.RENTDURATION.DAYS > 30 {
 				error.MESSAGE = "Please enter a valid filed Days, should be less than 31!"
@@ -71,7 +59,6 @@ func RentBook(next http.HandlerFunc) http.HandlerFunc {
 					panic(err.Error())
 				}
 				w.WriteHeader(error.CODE)
-				w.Header().Set("content-type", "application/json")
 				w.Write(json)
 			} else if duration.RENTDURATION.MONTHS > 3 || duration.RENTDURATION.MONTHS == 3 && duration.RENTDURATION.DAYS != 0 {
 				error.MESSAGE = "maximum period for rent is 3 months"
@@ -80,7 +67,6 @@ func RentBook(next http.HandlerFunc) http.HandlerFunc {
 					panic(err.Error())
 				}
 				w.WriteHeader(error.CODE)
-				w.Header().Set("content-type", "application/json")
 				w.Write(json)
 			} else {
 				r.Body = io.NopCloser(bytes.NewBuffer(body))
@@ -94,18 +80,18 @@ func RentBook(next http.HandlerFunc) http.HandlerFunc {
 func GiveBack(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
+		w.Header().Set("content-type", "application/json")
 		var error schema.Error
 		error.CODE = 400
 		error.STATUSTEXT = http.StatusText(400)
 		error.MESSAGE = "Bad request it is a PUT route"
 
-		if r.Method != "PUT" {
+		if r.Method != http.MethodPut {
 			json, err := json.Marshal(error)
 			if err != nil {
 				panic(err.Error())
 			}
 			w.WriteHeader(error.CODE)
-			w.Header().Set("content-type", "application/json")
 			w.Write(json)
 		} else if r.Header.Get("Content-Type") != "application/json" {
 			error.MESSAGE = "Content-Type should be application/json"
@@ -114,7 +100,6 @@ func GiveBack(next http.HandlerFunc) http.HandlerFunc {
 				panic(err.Error())
 			}
 			w.WriteHeader(error.CODE)
-			w.Header().Set("content-type", "application/json")
 			w.Write(json)
 
 		} else {
@@ -136,7 +121,6 @@ func GiveBack(next http.HandlerFunc) http.HandlerFunc {
 					panic(err.Error())
 				}
 				w.WriteHeader(error.CODE)
-				w.Header().Set("content-type", "application/json")
 				w.Write(json)
 			} else {
 				r.Body = io.NopCloser(bytes.NewBuffer(body))

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -50,12 +51,34 @@ func startPostgresContainer() error {
 	return nil
 }
 
+// @title Books Api
+// @version 1
+// @contact.name Aamir Zaheer
+// @contact.email aamirzaheer95@gmail.com
+
+// @securityDefinitions.apikey bearerToken
+// @in header
+// @name Authorization
+// @description Enter your access_token in the form of <b>Bearer &lt;access_token&gt;</b>
 func main() {
 
 	// Start the PostgreSQL container
 	if err := startPostgresContainer(); err != nil {
 		log.Fatalf("Failed to start PostgreSQL container: %v", err)
 	}
+
+	// Serve Swagger JSON
+	http.HandleFunc("/swagger.json", func(w http.ResponseWriter, r *http.Request) {
+		swaggerFile, err := os.Open("docs/swagger.json")
+		if err != nil {
+			http.Error(w, "Unable to serve Swagger JSON", http.StatusInternalServerError)
+			return
+		}
+		defer swaggerFile.Close()
+		io.Copy(w, swaggerFile)
+	})
+
+	http.Handle("/swagger/", http.StripPrefix("/swagger/", http.FileServer(http.Dir("docs/swagger-ui"))))
 
 	// Create a new cron scheduler
 	c := cron.New()

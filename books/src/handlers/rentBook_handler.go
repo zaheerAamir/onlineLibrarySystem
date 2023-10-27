@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"searchRecommend/books/schema"
 	service "searchRecommend/books/services"
+	"searchRecommend/books/src/middlewares"
 	"strconv"
 	"strings"
 	"time"
@@ -17,8 +18,20 @@ type RentBookHandler struct {
 	Bookservice *service.RentBookService
 }
 
+// @Summary RentBook route
+// @Description User can rent a book for a period of time
+// @Tags books
+// @Accept json
+// @Produce json
+// @Security bearerToken
+// @Param id path int true "ID of the book to rent"
+// @Param body body schema.RentBookDTO true "Request body in JSON format"
+// @Success 200 {object} schema.RentBookSuccess
+// @Failure 401 {object}  schema.Error
+// @Router /rentBook/{id}  [post]
 func (handler *RentBookHandler) RentbookHandler(w http.ResponseWriter, r *http.Request) {
 
+	w.Header().Set("content-type", "application/json")
 	parts := strings.Split(r.URL.Path, "/")
 	dynamicParam := parts[2]
 	bookId, errr := strconv.Atoi(dynamicParam)
@@ -26,6 +39,12 @@ func (handler *RentBookHandler) RentbookHandler(w http.ResponseWriter, r *http.R
 		panic(errr.Error())
 	}
 	log.Println(bookId)
+
+	userID, ok := r.Context().Value(middlewares.UserIDKey).(int64)
+
+	if !ok {
+		panic("UserID not found or has unexpected type")
+	}
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -98,7 +117,7 @@ func (handler *RentBookHandler) RentbookHandler(w http.ResponseWriter, r *http.R
 	}
 	//*********CONVERTING USER'S RENTDURATION TO MODIFIED SCHEMA END***********
 
-	error := handler.Bookservice.RentbookService(rentDuration, lastDayOfMonth, currMonth, day, year, bookId)
+	error := handler.Bookservice.RentbookService(rentDuration, lastDayOfMonth, currMonth, day, year, bookId, userID)
 	if error.CODE != 0 || error.STATUSTEXT != "" || error.MESSAGE != "" {
 		json, err := json.Marshal(error)
 		if err != nil {
@@ -106,17 +125,38 @@ func (handler *RentBookHandler) RentbookHandler(w http.ResponseWriter, r *http.R
 		}
 
 		w.WriteHeader(error.CODE)
-		w.Header().Set("content-type", "application/json")
 		w.Write(json)
 
 	} else {
+		var success schema.RentBookSuccess
 		message := fmt.Sprintf("Book successfully rented.Please take is bookId: [[%d]] with you at the time of returing the book submit the bookid along with it.", bookId)
-		w.Write([]byte(message))
+		success.STATUS_CODE = 201
+		success.STATUS_TEXT = http.StatusText(success.STATUS_CODE)
+		success.MESSAGE = message
+
+		json, err := json.Marshal(success)
+		if err != nil {
+			panic(err.Error())
+		}
+
+		w.WriteHeader(success.STATUS_CODE)
+		w.Write(json)
 	}
 
 }
 
+// @Summary Give Book back route
+// @Description User can give the rented book back to the admin and admin can update the user rent details
+// @Tags books
+// @Accept json
+// @Produce json
+// @Security bearerToken
+// @Param body body schema.GiveBookBackDTO true "Request body in JSON format"
+// @Success 200 {object} schema.RentBookSuccess
+// @Failure 401 {object}  schema.Error
+// @Router /giveBookBack  [put]
 func (handler *RentBookHandler) GiveBookBackHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("content-type", "application/json")
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		panic(err.Error())
@@ -137,11 +177,20 @@ func (handler *RentBookHandler) GiveBookBackHandler(w http.ResponseWriter, r *ht
 		}
 
 		w.WriteHeader(error.CODE)
-		w.Header().Set("content-type", "application/json")
 		w.Write(json)
 
 	} else {
-		w.Write([]byte("Updated User rent details succesfully"))
+		var success schema.RentBookSuccess
+		success.STATUS_CODE = 201
+		success.STATUS_TEXT = http.StatusText(success.STATUS_CODE)
+		success.MESSAGE = "Updated User rent details successfully!"
+
+		json, err := json.Marshal(success)
+		if err != nil {
+			panic(err.Error())
+		}
+
+		w.Write(json)
 	}
 
 }

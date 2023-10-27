@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -9,12 +10,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/joho/godotenv"
 )
 
+type ContextKey string
+
+const UserIDKey ContextKey = "user_id"
+
 func AuthorizeAdmin(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("content-type", "application/json")
 		envPath := os.Getenv("API_KEY")
 
 		log.Println("ENV_PATH", envPath)
@@ -43,7 +49,6 @@ func AuthorizeAdmin(next http.HandlerFunc) http.HandlerFunc {
 						panic(err.Error())
 					}
 					w.WriteHeader(errorr.CODE)
-					w.Header().Set("content-type", "application/json")
 					w.Write(json)
 				}
 				return []byte(secret), nil
@@ -54,7 +59,6 @@ func AuthorizeAdmin(next http.HandlerFunc) http.HandlerFunc {
 					panic(err.Error())
 				}
 				w.WriteHeader(errorr.CODE)
-				w.Header().Set("content-type", "application/json")
 				w.Write(json)
 			}
 
@@ -71,7 +75,6 @@ func AuthorizeAdmin(next http.HandlerFunc) http.HandlerFunc {
 						panic(err.Error())
 					}
 					w.WriteHeader(errorr.CODE)
-					w.Header().Set("content-type", "application/json")
 					w.Write(json)
 				}
 
@@ -94,7 +97,6 @@ func AuthorizeAdmin(next http.HandlerFunc) http.HandlerFunc {
 				panic(err.Error())
 			}
 			w.WriteHeader(errorr.CODE)
-			w.Header().Set("content-type", "application/json")
 			w.Write(json)
 		}
 	}
@@ -103,6 +105,7 @@ func AuthorizeAdmin(next http.HandlerFunc) http.HandlerFunc {
 func AuthorizeUser(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
+		w.Header().Set("content-type", "application/json")
 		envPath := os.Getenv("API_KEY")
 
 		log.Println("ENV_PATH", envPath)
@@ -131,7 +134,6 @@ func AuthorizeUser(next http.HandlerFunc) http.HandlerFunc {
 						panic(err.Error())
 					}
 					w.WriteHeader(errorr.CODE)
-					w.Header().Set("content-type", "application/json")
 					w.Write(json)
 				}
 				return []byte(secret), nil
@@ -142,20 +144,32 @@ func AuthorizeUser(next http.HandlerFunc) http.HandlerFunc {
 					panic(err.Error())
 				}
 				w.WriteHeader(errorr.CODE)
-				w.Header().Set("content-type", "application/json")
 				w.Write(json)
 			}
 
+			claims, ok := token.Claims.(jwt.MapClaims)
+			if !ok {
+				log.Println("Unable to extract claims")
+				// Handle the error
+				return
+			}
+			log.Println("CLAIMS2", claims)
+			// OUTPUT
+			// 2023/10/24 23:44:42 map[exp:1.698171316e+09 iat:1.698171256e+09 role:false user_id:5.462434098e+09]
+
+			user_ID_Float := token.Claims.(jwt.MapClaims)["user_id"].(float64)
+			user_ID := int64(user_ID_Float)
+			log.Println(user_ID)
+			ctx := context.WithValue(r.Context(), UserIDKey, user_ID)
+			r = r.WithContext(ctx)
+
 			role := token.Claims.(jwt.MapClaims)["role"].(bool)
-			if token.Valid {
+			if token.Valid && !role {
 				log.Println("admin:", role)
 				next.ServeHTTP(w, r)
 			}
 			// Check the expiration time
-			expirationTime, ok := token.Claims.(jwt.MapClaims)["exp"].(float64)
-			if !ok {
-				log.Println("unable to extract expiration time")
-			}
+			expirationTime := token.Claims.(jwt.MapClaims)["exp"].(float64)
 
 			// Convert the expiration time to a Go time.Time object
 			expiration := time.Unix(int64(expirationTime), 0)
@@ -169,7 +183,6 @@ func AuthorizeUser(next http.HandlerFunc) http.HandlerFunc {
 				panic(err.Error())
 			}
 			w.WriteHeader(errorr.CODE)
-			w.Header().Set("content-type", "application/json")
 			w.Write(json)
 		}
 

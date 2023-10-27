@@ -7,8 +7,14 @@ type UserDto struct {
 	PASSWORD   string `json:"password"`
 }
 
+type UserSuccess struct {
+	CODE    int    `json:"status_code"`
+	TEXT    string `json:"text"`
+	MESSAGE string `json:"message"`
+}
+
 type UserSchema struct {
-	ID            int    `json:"user_id"`
+	ID            int64  `json:"user_id"`
 	LAST_NAME     string `json:"last_name"`
 	FIRST_NAME    string `json:"first_name"`
 	EMAIL         string `json:"email"`
@@ -21,7 +27,7 @@ type UserLoginDto struct {
 	PASSWORD string `json:"password"`
 }
 
-type UserSucces struct {
+type UserLoginSuccess struct {
 	CODE          int    `json:"status_code"`
 	TEXT          string `json:"text"`
 	ACCES_TOKEN   string `json:"access_token"`
@@ -34,10 +40,6 @@ type RefreshTokenDTO struct {
 
 type AccessTokenSchema struct {
 	AccessToken string `json:"access_token"`
-}
-
-type Logout struct {
-	EMAIL string `json:"email"`
 }
 
 type Error struct {

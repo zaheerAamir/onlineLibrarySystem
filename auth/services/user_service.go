@@ -10,11 +10,9 @@ import (
 	"os"
 	repository "searchRecommend/auth/repositories"
 	"searchRecommend/auth/schema"
-	"strconv"
-	"strings"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/joho/godotenv"
 )
 
@@ -47,27 +45,21 @@ func (userservice *UserService) CreateUserService(userDto schema.UserDto) (bool,
 	// *****HASHING THE PASSWORD END*****
 
 	// *****GENERATING RANDOM 10 DIGIT USERID START*****
-	const charset = "0123456789"
-	var result strings.Builder
+	max := big.NewInt(10)
+	number := int64(0)
+
 	for i := 0; i < 10; i++ {
-		index, _ := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
-		result.WriteByte(charset[index.Int64()])
+		digit, err := rand.Int(rand.Reader, max)
+		if err != nil {
+			log.Fatalf(err.Error())
+		}
+		number = number*10 + digit.Int64()
 	}
-	id, errr := strconv.Atoi(result.String())
-	if errr != nil {
-		panic(errr.Error())
-	}
-	user.ID = id
+	user.ID = number
 	// *****GENERATING RANDOM 10 DIGIT USERID END*****
 
-	log.Println(user)
 	exists := userservice.UserRepo.CreateUserQuery(user)
 
-	if exists {
-		log.Println("User Created")
-	} else {
-		log.Println("Email alredy exists")
-	}
 	return exists, nil
 
 }
@@ -99,7 +91,6 @@ func (userservice *UserService) LoginUserService(user schema.UserLoginDto) (bool
 	error.CODE = 404
 	error.STATUSTEXT = http.StatusText(error.CODE)
 	error.MESSAGE = "User does not exist!"
-	log.Println("User does not exists")
 	return false, error
 
 }
@@ -119,18 +110,21 @@ func (userservice *UserService) CreateJWT(email string) (string, string, error) 
 	accessSecret := os.Getenv("ACCESS_TOKEN_SECRET")
 	refreshSecret := os.Getenv("REFRESH_TOKEN_SECRET")
 
-	admin := userservice.UserRepo.CreateJWTQuery(email)
+	admin, user_id := userservice.UserRepo.CreateJWTQuery(email)
+	log.Println("User_ID:", user_id)
 
 	accessTokenClaims := jwt.MapClaims{
-		"exp":  time.Now().Add(time.Minute).Unix(), // Token will expire in 1 minute
-		"iat":  time.Now().Unix(),
-		"role": admin,
+		"exp":     time.Now().Add(time.Minute).Unix(), // Token will expire in 1 minute
+		"iat":     time.Now().Unix(),
+		"role":    admin,
+		"user_id": user_id,
 		// Add other claims as needed
 	}
 
 	refreshTokenClaims := jwt.MapClaims{
-		"iat":  time.Now().Unix(),
-		"role": admin,
+		"iat":     time.Now().Unix(),
+		"role":    admin,
+		"user_id": user_id,
 	}
 
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessTokenClaims)
@@ -140,6 +134,7 @@ func (userservice *UserService) CreateJWT(email string) (string, string, error) 
 	if err != nil {
 		panic(err.Error())
 	}
+	log.Println("ACCESS TOKEN:", accessTokeStr)
 
 	refreshTokenStr, err1 := refreshToken.SignedString([]byte(refreshSecret))
 	if err1 != nil {
@@ -152,10 +147,8 @@ func (userservice *UserService) CreateJWT(email string) (string, string, error) 
 
 func (userservice *UserService) RefreshTokenService(token string) (bool, string) {
 
-	log.Println("token:", token)
 	check := userservice.UserRepo.RefreshTokenQuery(token)
 
-	log.Println("Service:", check)
 	if !check {
 		return check, ""
 	}
@@ -173,7 +166,7 @@ func (userservice *UserService) RefreshTokenService(token string) (bool, string)
 	checkToken, errr := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
 		_, ok := t.Method.(*jwt.SigningMethodHMAC)
 		if !ok {
-			log.Println("Incorrect Token!")
+			log.Println("[User Service] Incorrect Token!")
 		}
 		return []byte(secret), nil
 	})
@@ -188,10 +181,12 @@ func (userservice *UserService) RefreshTokenService(token string) (bool, string)
 		accessSecret := os.Getenv("ACCESS_TOKEN_SECRET")
 
 		role := checkToken.Claims.(jwt.MapClaims)["role"].(bool)
+		userID_FOLAT := checkToken.Claims.(jwt.MapClaims)["user_id"].(float64)
 		accessTokenClaims := jwt.MapClaims{
-			"exp":  time.Now().Add(time.Minute).Unix(), // Token will expire in 1 minute
-			"iat":  time.Now().Unix(),
-			"role": role,
+			"exp":     time.Now().Add(time.Minute).Unix(), // Token will expire in 1 minute
+			"iat":     time.Now().Unix(),
+			"role":    role,
+			"user_id": int64(userID_FOLAT),
 			// Add other claims as needed
 		}
 
@@ -207,8 +202,8 @@ func (userservice *UserService) RefreshTokenService(token string) (bool, string)
 
 }
 
-func (userservice *UserService) LogoutService(email string) bool {
+func (userservice *UserService) LogoutService(user_id int64) bool {
 
-	check := userservice.UserRepo.LogoutQuery(email)
+	check := userservice.UserRepo.LogoutQuery(user_id)
 	return check
 }

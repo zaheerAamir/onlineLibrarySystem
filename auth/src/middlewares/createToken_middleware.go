@@ -12,6 +12,7 @@ import (
 func CreateToken(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
+		w.Header().Set("content-type", "application/json")
 		var error schema.Error
 		error.CODE = 400
 		error.STATUSTEXT = http.StatusText(400)
@@ -23,7 +24,6 @@ func CreateToken(next http.HandlerFunc) http.HandlerFunc {
 				panic(err.Error())
 			}
 			w.WriteHeader(error.CODE)
-			w.Header().Set("content-type", "application/json")
 			w.Write(json)
 		} else if r.Header.Get("Content-Type") != "application/json" {
 			error.MESSAGE = "Content-Type should be application/json"
@@ -32,7 +32,6 @@ func CreateToken(next http.HandlerFunc) http.HandlerFunc {
 				panic(err.Error())
 			}
 			w.WriteHeader(error.CODE)
-			w.Header().Set("content-type", "application/json")
 			w.Write(json)
 
 		} else {
@@ -54,7 +53,6 @@ func CreateToken(next http.HandlerFunc) http.HandlerFunc {
 					panic(err.Error())
 				}
 				w.WriteHeader(error.CODE)
-				w.Header().Set("content-type", "application/json")
 				w.Write(json)
 
 			} else {

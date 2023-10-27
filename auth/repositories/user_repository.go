@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 	"log"
+	"reflect"
 	"searchRecommend/auth/schema"
 	util "searchRecommend/auth/util"
 )
@@ -34,9 +35,9 @@ func (userquery *UserRepository) CreateUserQuery(user schema.UserSchema) bool {
 	}
 	if count == 0 {
 		insertUser := fmt.Sprintf(`INSERT INTO users 
-		(userid, lastname, firstname, email, hashpass, salt)
+		(userid, lastname, firstname, email, hashpass, salt, admin)
         VALUES 
-		('%d', '%s', '%s', '%s', '%s', '%s');`, user.ID, user.LAST_NAME, user.FIRST_NAME, user.EMAIL, user.HASH_PASSWORD, user.SALT)
+		('%d', '%s', '%s', '%s', '%s', '%s', '%t');`, user.ID, user.LAST_NAME, user.FIRST_NAME, user.EMAIL, user.HASH_PASSWORD, user.SALT, false)
 
 		query, err1 := db.Query(insertUser)
 		if err1 != nil {
@@ -105,7 +106,7 @@ func (userquery *UserRepository) LoginUserQuery(userLoginCred schema.UserLoginDt
 
 }
 
-func (userquery *UserRepository) CreateJWTQuery(email string) bool {
+func (userquery *UserRepository) CreateJWTQuery(email string) (bool, int64) {
 
 	db, err := userquery.Db.ConnectDB()
 	if err != nil {
@@ -113,23 +114,27 @@ func (userquery *UserRepository) CreateJWTQuery(email string) bool {
 	}
 	defer db.Close()
 
-	getUserRole := fmt.Sprintf("SELECT admin FROM users WHERE email = '%s';", email)
+	getUserRole := fmt.Sprintf("SELECT admin, userid FROM users WHERE email = '%s';", email)
 	query, err1 := db.Query(getUserRole)
 	if err1 != nil {
 		panic(err1.Error())
 	}
 
 	var roleAdmin bool
+	var user_id int64 // Use an empty interface
+	// var user_id int64
 	if query.Next() {
 		data := query.Scan(
 			&roleAdmin,
+			&user_id,
 		)
 
 		if data != nil {
 			panic(data.Error())
 		}
 	}
-	return roleAdmin
+	log.Println(reflect.TypeOf(user_id), user_id)
+	return roleAdmin, user_id
 }
 
 func (userquery *UserRepository) StoreRefreshTokenQuery(refreshToken, email string) {
@@ -185,7 +190,7 @@ func (userquery *UserRepository) RefreshTokenQuery(token string) bool {
 	return true
 }
 
-func (userquery *UserRepository) LogoutQuery(email string) bool {
+func (userquery *UserRepository) LogoutQuery(user_id int64) bool {
 
 	db, err := userquery.Db.ConnectDB()
 	if err != nil {
@@ -193,34 +198,36 @@ func (userquery *UserRepository) LogoutQuery(email string) bool {
 	}
 	defer db.Close()
 
-	checkEmail := fmt.Sprintf("SELECT COUNT(*) FROM users WHERE email = '%s';", email)
-	query, err1 := db.Query(checkEmail)
+	checkUserID := fmt.Sprintf("SELECT COUNT(*) FROM users WHERE userid = %d;", user_id)
+	query, err1 := db.Query(checkUserID)
 	if err1 != nil {
 		panic(err1.Error())
 	}
 
-	var count int
+	var count1 int
 	if query.Next() {
-		data := query.Scan(&count)
+		data := query.Scan(&count1)
 		if data != nil {
 			panic(data.Error())
 		}
 	}
 
-	if count != 0 {
-		deleteToken := fmt.Sprintf("UPDATE users SET refresh_token = '' WHERE email = '%s';", email)
-		query1, err2 := db.Query(deleteToken)
-		if err2 != nil {
-			panic(err2.Error())
-		}
-
-		if query1.Next() {
-			data := query.Scan(&count)
-			if data != nil {
-				panic(data.Error())
-			}
-		}
-		return true
+	if count1 == 0 {
+		return false
 	}
-	return false
+
+	deleteToken := fmt.Sprintf("UPDATE users SET refresh_token = '' WHERE userid = %d;", user_id)
+	query1, err2 := db.Query(deleteToken)
+	if err2 != nil {
+		panic(err2.Error())
+	}
+
+	if query1.Next() {
+		data := query.Scan()
+		if data != nil {
+			panic(data.Error())
+		}
+	}
+	log.Println(deleteToken)
+	return true
 }

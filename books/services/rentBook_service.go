@@ -10,7 +10,7 @@ type RentBookService struct {
 	RentBookRepo *repository.RentBookRepo
 }
 
-func (service *RentBookService) RentbookService(body schema.RentBookDTO, currMonthEnd, currMonth, currDay, currYear, bookId int) schema.Error {
+func (service *RentBookService) RentbookService(body schema.RentBookDTO, currMonthEnd int, currMonth int, currDay int, currYear int, bookId int, userID int64) schema.Error {
 
 	rentedDay := currDay
 	rentedMonth := currMonth
@@ -72,7 +72,7 @@ func (service *RentBookService) RentbookService(body schema.RentBookDTO, currMon
 		}
 	}
 	var rent schema.RentBookSchema
-	rent.USER_ID = body.USER_ID
+	rent.USER_ID = userID
 	rent.RENTED_DATE.DAY = rentedDay
 	rent.RENTED_DATE.MONTH = rentedMonth
 	rent.RENTED_DATE.YEAR = rentedYear
