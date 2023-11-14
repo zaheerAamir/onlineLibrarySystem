@@ -14,6 +14,8 @@ A full microservice architecture API containing Books service and Auth service.
 * A admin protected route which can clear rent details of users if book submitted on time.
 * There is also a nginx container which proxies the incomming request to the services.
 
+[![Screenshot1](./images/screenshot1.png)](./images/screenshot1.png)
+
 This is a online library management simulation where users can see how a high performance online library system works. 
 
 ## Tech stack used⚙️:
@@ -22,10 +24,6 @@ This is a online library management simulation where users can see how a high pe
 * **Authentication:** JWT
 * **Architecture:** Microservice
 * **Containerization:** Docker
-
-<a href="./images/screenshot1.png">
-  <img src="./images/screenshot1.png.png" alt="Screenshot1" width="850px" height="500px">
-</a>
 
 ## NOTE⭐:
 * Once the Access token is generated copy the access token inside the double quotes and click on AUTHORIZE button on the top right corner and paste the token in this format:
