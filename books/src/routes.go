@@ -15,7 +15,7 @@ func Setuproutes(bookhandler *handler.BookHandler,
 }
 
 func bookRoutes(bookhandler *handler.BookHandler) {
-	http.HandleFunc("/queryCount", middlewares.LoggerMiddleware(middlewares.AuthorizeUser(bookhandler.Query)))
+	http.HandleFunc("/queryCount", middlewares.LoggerMiddleware(bookhandler.Query))
 	http.HandleFunc("/getBooks", middlewares.LoggerMiddleware(middlewares.AuthorizeUser(bookhandler.GetBooks)))
 	http.HandleFunc("/filterBooks", middlewares.LoggerMiddleware(middlewares.AuthorizeUser(bookhandler.FilterBooks)))
 

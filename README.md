@@ -47,3 +47,4 @@ git clone https://github.com/zaheerAamir/onlineLibrarySystem.git
 ```
 </pre>
 * Just clone the Repo make the required changes and submit a pull request.
+* **NOTE** If you don't have docker installed locally then remove "host=postgres" from line 28 of utils/connectdb.go in both books and auth folders.
