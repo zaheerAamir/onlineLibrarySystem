@@ -20,6 +20,20 @@ type UserService struct {
 	UserRepo *repository.UserRepository
 }
 
+func (bookService *UserService) DbService() bool {
+
+	count, err := bookService.UserRepo.QueryCount()
+	if err != nil {
+		panic(err)
+	}
+	//9938 is number of books present in booktwo table
+	if count == 9938 {
+		return true
+	}
+
+	return false
+}
+
 func (userservice *UserService) CreateUserService(userDto schema.UserDto) (bool, error) {
 
 	var user schema.UserSchema

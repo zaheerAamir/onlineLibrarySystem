@@ -18,8 +18,13 @@ type BookHandler struct {
 
 func (handler *BookHandler) Query(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
-	count := handler.Bookservice.DbService()
-	dum := fmt.Sprintf("Helllo: %d", count)
+	healthCheck := handler.Bookservice.DbService()
+	var dum string
+	if healthCheck {
+
+		dum = fmt.Sprintf("Helllo: %s", "Bookservice is healthy")
+
+	}
 
 	json, err := json.Marshal(dum)
 

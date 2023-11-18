@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -12,6 +13,28 @@ import (
 
 type UserHandler struct {
 	UserService *service.UserService
+}
+
+//Handlers
+//healthCheck handler
+
+func (handler *UserHandler) Query(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("content-type", "application/json")
+	healthCheck := handler.UserService.DbService()
+	var dum string
+	if healthCheck {
+
+		dum = fmt.Sprintf("Helllo: %s", "Authservice is healthy")
+	}
+
+	json, err := json.Marshal(dum)
+
+	if err != nil {
+		log.Fatal(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(json)
 }
 
 // @Summary SignUp user route

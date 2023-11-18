@@ -12,6 +12,30 @@ type UserRepository struct {
 	Db *util.Db
 }
 
+func (bookquery *UserRepository) QueryCount() (int, error) {
+
+	db, err := bookquery.Db.ConnectDB()
+	if err != nil {
+		panic(err)
+	}
+
+	defer db.Close()
+	query, errr := db.Query("SELECT COUNT(*) FROM booktwo;")
+	if errr != nil {
+		panic(errr)
+	}
+
+	var count int
+	if query.Next() {
+		data := query.Scan(&count)
+		if data != nil {
+			panic(data.Error())
+		}
+	}
+
+	return count, nil
+}
+
 func (userquery *UserRepository) CreateUserQuery(user schema.UserSchema) bool {
 
 	db, err := userquery.Db.ConnectDB()

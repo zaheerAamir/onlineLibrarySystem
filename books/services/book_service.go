@@ -14,14 +14,17 @@ type BookService struct {
 }
 
 // main logic
-func (bookService *BookService) DbService() int {
+func (bookService *BookService) DbService() bool {
 
 	count, err := bookService.BookRepo.QueryCount()
 	if err != nil {
 		panic(err)
 	}
+	if count == 9938 {
+		return true
+	}
 
-	return count
+	return false
 }
 
 func (bookservice *BookService) GetBooksService(limit, page_no string) ([]schema.Books, float64, int) {

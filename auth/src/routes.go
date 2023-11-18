@@ -8,6 +8,7 @@ import (
 
 func SetupRoutes(userhandler *handler.UserHandler) {
 
+	http.HandleFunc("/queryCount", middlewares.LoggerMiddleware(userhandler.Query))
 	http.HandleFunc("/createUser", middlewares.LoggerMiddleware(middlewares.SetContentType(middlewares.SignUp(userhandler.CreateUserHandler))))
 	http.HandleFunc("/login", middlewares.LoggerMiddleware(middlewares.SetContentType(middlewares.Login(userhandler.LoginUserHandler))))
 
