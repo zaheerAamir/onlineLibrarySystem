@@ -21,6 +21,7 @@ services:
     build: 
       context: .
       dockerfile: books/Dockerfile
+    image: searchrecommend-booksservice:v1
     ports:
       - "8080:8080"
     environment:
@@ -39,6 +40,7 @@ services:
     build: 
       context: .
       dockerfile: auth/Dockerfile
+    image: searchrecommend-authservice:v1 
     ports:
       - "8081:8081"
     environment:
