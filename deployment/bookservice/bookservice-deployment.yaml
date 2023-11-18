@@ -1,0 +1,32 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bookservice-deployment 
+spec:
+  selector:
+    matchLabels:
+      app: bookservice 
+  template:
+    metadata:
+      labels:
+        app: bookservice 
+    spec:
+      containers:
+      - name: bookservice 
+        image: rocker45/searchrecommend-booksservice:latest
+        envFrom: 
+          - secretRef:
+              name: bookservice-secret
+        env: 
+          - name: DATABASE_HOST
+            value: postgres-service
+          - name: DATABASE_PORT
+            value: "5432"
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8080 
+        command: ["go", "run", "main.go", "-b", "0.0.0.0"]

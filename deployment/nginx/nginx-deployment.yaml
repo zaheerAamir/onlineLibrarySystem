@@ -1,0 +1,24 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment 
+spec:
+  selector:
+    matchLabels:
+      app: nginx 
+  template:
+    metadata:
+      labels:
+        app: nginx 
+    spec:
+      containers:
+      - name: nginx 
+        image: rocker45/searchrecommend-nginx:latest
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 80
+        command: ["/bin/bash", "-c", "cd /usr/src/app && ./wait-for-it.sh -t 60 booksservice:8080 && ./wait-for-it.sh -t 60 authservice:8081 && nginx -g 'daemon off;'"]

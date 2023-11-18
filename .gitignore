@@ -1,3 +1,6 @@
 ex.txt
 .env
 credentials.json
+postgres-secret.yaml
+bookservice-secret.yaml
+authservice-secret.yaml

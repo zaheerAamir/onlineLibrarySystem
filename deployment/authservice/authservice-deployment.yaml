@@ -1,0 +1,32 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authservice-deployment 
+spec:
+  selector:
+    matchLabels:
+      app: authservice 
+  template:
+    metadata:
+      labels:
+        app: authservice 
+    spec:
+      containers:
+      - name: authservice 
+        image: rocker45/searchrecommend-authservice:latest
+        envFrom: 
+          - secretRef:
+              name: authservice-secret
+        env: 
+          - name: DATABASE_HOST
+            value: postgres-service
+          - name: DATABASE_PORT
+            value: "5432"
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8081 
+        command: ["go", "run", "main.go", "-b", "0.0.0.0"]
