@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: bookservice 
-        image: rocker45/searchrecommend-booksservice:latest
+        image: rocker45/searchrecommend-booksservice:v1
         envFrom: 
           - secretRef:
               name: bookservice-secret
