@@ -128,7 +128,7 @@ func (userservice *UserService) CreateJWT(email string) (string, string, error) 
 	log.Println("User_ID:", user_id)
 
 	accessTokenClaims := jwt.MapClaims{
-		"exp":     time.Now().Add(time.Minute).Unix(), // Token will expire in 1 minute
+		"exp":     time.Now().Add(5 * time.Minute).Unix(), // Token will expire in 1 minute
 		"iat":     time.Now().Unix(),
 		"role":    admin,
 		"user_id": user_id,
@@ -197,7 +197,7 @@ func (userservice *UserService) RefreshTokenService(token string) (bool, string)
 		role := checkToken.Claims.(jwt.MapClaims)["role"].(bool)
 		userID_FOLAT := checkToken.Claims.(jwt.MapClaims)["user_id"].(float64)
 		accessTokenClaims := jwt.MapClaims{
-			"exp":     time.Now().Add(time.Minute).Unix(), // Token will expire in 1 minute
+			"exp":     time.Now().Add(5 * time.Minute).Unix(), // Token will expire in 1 minute
 			"iat":     time.Now().Unix(),
 			"role":    role,
 			"user_id": int64(userID_FOLAT),

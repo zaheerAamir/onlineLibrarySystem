@@ -21,4 +21,11 @@ spec:
             cpu: "500m"
         ports:
         - containerPort: 80
-        command: ["/bin/bash", "-c", "cd /usr/src/app && ./wait-for-it.sh -t 60 booksservice:8080 && ./wait-for-it.sh -t 60 authservice:8081 && nginx -g 'daemon off;'"]
+        volumeMounts: 
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d/
+        command: ["/bin/bash", "-c", "cd /etc/nginx/conf.d/ && ls && cd /usr/src/app && ./wait-for-it.sh -t 60 booksservice:8080 && ./wait-for-it.sh -t 60 authservice:8081 && nginx -g 'daemon off;'"]
+      volumes:
+      - name: nginx-config
+        configMap: 
+          name: nginx-config
