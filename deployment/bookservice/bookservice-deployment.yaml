@@ -15,6 +15,7 @@ spec:
       containers:
       - name: bookservice 
         image: rocker45/searchrecommend-booksservice:v1
+        imagePullPolicy: Always
         envFrom: 
           - secretRef:
               name: bookservice-secret

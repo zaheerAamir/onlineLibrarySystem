@@ -15,6 +15,7 @@ spec:
       containers:
       - name: authservice 
         image: rocker45/searchrecommend-authservice:v1
+        imagePullPolicy: Always
         envFrom: 
           - secretRef:
               name: authservice-secret
