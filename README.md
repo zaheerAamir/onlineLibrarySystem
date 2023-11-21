@@ -1,5 +1,5 @@
 # onlineLibrarySystem
-Online library system to search and rent books.
+Online library system to search and rent books. Link: http://34.68.78.27/swagger-ui/ 
 
 A full microservice architecture API containing Books service and Auth service.
 
@@ -24,6 +24,7 @@ This is a online library management simulation where users can see how a high pe
 * **Authentication:** JWT
 * **Architecture:** Microservice
 * **Containerization:** Docker
+* **Deployment:** GKE(Google Kubernetes Engine)
 
 ## NOTE⭐:
 * Once the Access token is generated copy the access token inside the double quotes and click on AUTHORIZE button on the top right corner and paste the token in this format:
