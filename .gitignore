@@ -5,3 +5,4 @@ postgres-secret.yaml
 bookservice-secret.yaml
 authservice-secret.yaml
 deployment/nginx/default.conf
+fetch.js
