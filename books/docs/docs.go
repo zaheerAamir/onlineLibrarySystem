@@ -227,6 +227,9 @@ const docTemplate = `{
                 "authors": {
                     "type": "string"
                 },
+                "avg_rating": {
+                    "type": "number"
+                },
                 "language_code": {
                     "type": "string"
                 },
@@ -238,9 +241,6 @@ const docTemplate = `{
                 },
                 "publisher": {
                     "type": "string"
-                },
-                "rage_rating": {
-                    "type": "number"
                 },
                 "text_reviews_count": {
                     "type": "integer"

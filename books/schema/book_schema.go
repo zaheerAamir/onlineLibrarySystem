@@ -3,7 +3,7 @@ package schema
 type Books struct {
 	TITLE              string  `json:"title"`
 	AUTHORS            string  `json:"authors"`
-	AVERAGE_RATING     float64 `json:"rage_rating"`
+	AVERAGE_RATING     float64 `json:"avg_rating"`
 	LANGUAGE_CODE      string  `json:"language_code"`
 	NUM_PAGES          int     `json:"num_pages"`
 	Text_REVIEWS_COUNT int     `json:"text_reviews_count"`

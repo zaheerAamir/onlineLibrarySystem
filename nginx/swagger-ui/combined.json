@@ -1,12 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-	  "title": "Books Api",
-	  "contact": {
-		  "name": "Aamir Zaheer",
-		  "email": "aamirzaheer95@gmail.com"
-	  },
-	  "version": "1"
+    "contact": {}
   },
   "paths": {
     "/filterBooks": {
@@ -366,6 +361,9 @@
         "authors": {
           "type": "string"
         },
+        "avg_rating": {
+          "type": "number"
+        },
         "language_code": {
           "type": "string"
         },
@@ -377,9 +375,6 @@
         },
         "publisher": {
           "type": "string"
-        },
-        "rage_rating": {
-          "type": "number"
         },
         "text_reviews_count": {
           "type": "integer"
