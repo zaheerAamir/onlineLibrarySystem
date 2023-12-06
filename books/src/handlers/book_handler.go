@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"searchRecommend/books/schema"
 	service "searchRecommend/books/services"
+	"sync"
+	"time"
 )
 
 type BookHandler struct {
@@ -48,44 +50,35 @@ func (handler *BookHandler) Query(w http.ResponseWriter, r *http.Request) {
 // @Router /getBooks  [get]
 func (handler *BookHandler) GetBooks(w http.ResponseWriter, r *http.Request) {
 
-	w.Header().Set("content-type", "application/json")
-	param := r.URL.Query()
+	var wg sync.WaitGroup
 
-	page_no := param.Get("page_no")
-	limit := param.Get("limit")
+	wg.Add(1)
 
-	var error schema.Error
-	error.CODE = 400
-	error.STATUSTEXT = http.StatusText(error.CODE)
-	error.MESSAGE = "Parameters page number and limit should not be empty"
+	tick := time.Now()
+	go func() {
 
-	if page_no == "" && limit == "" {
-		json, err := json.Marshal(error)
-		if err != nil {
-			log.Fatal(err.Error())
-		}
-		w.WriteHeader(error.CODE)
-		w.Write(json)
-	} else if page_no == "0" {
-		error.MESSAGE = "Invalid Page number! Page number starts from 1."
-		json, err := json.Marshal(error)
-		if err != nil {
-			log.Fatal(err.Error())
-		}
-		w.WriteHeader(error.CODE)
-		w.Write(json)
+		defer wg.Done()
 
-	} else {
+		w.Header().Set("content-type", "application/json")
+		param := r.URL.Query()
 
-		books, num_pages, page_no := handler.Bookservice.GetBooksService(limit, page_no)
+		page_no := param.Get("page_no")
+		limit := param.Get("limit")
 
+		var error schema.Error
 		error.CODE = 400
 		error.STATUSTEXT = http.StatusText(error.CODE)
-		error.MESSAGE = "Page number does exist"
+		error.MESSAGE = "Parameters page number and limit should not be empty"
 
-		if page_no > int(num_pages) {
-			errMessg := fmt.Sprintf("Incorrect page number value! Page nuber should not be greater that %d for limit %s", int(num_pages), limit)
-			error.MESSAGE = errMessg
+		if page_no == "" && limit == "" {
+			json, err := json.Marshal(error)
+			if err != nil {
+				log.Fatal(err.Error())
+			}
+			w.WriteHeader(error.CODE)
+			w.Write(json)
+		} else if page_no == "0" {
+			error.MESSAGE = "Invalid Page number! Page number starts from 1."
 			json, err := json.Marshal(error)
 			if err != nil {
 				log.Fatal(err.Error())
@@ -94,16 +87,41 @@ func (handler *BookHandler) GetBooks(w http.ResponseWriter, r *http.Request) {
 			w.Write(json)
 
 		} else {
-			json, err := json.Marshal(books)
-			if err != nil {
-				log.Fatal(w, err.Error(), http.StatusInternalServerError)
-				return
+
+			books, num_pages, page_no := handler.Bookservice.GetBooksService(limit, page_no)
+
+			error.CODE = 400
+			error.STATUSTEXT = http.StatusText(error.CODE)
+			error.MESSAGE = "Page number does exist"
+
+			if page_no > int(num_pages) {
+				errMessg := fmt.Sprintf("Incorrect page number value! Page nuber should not be greater that %d for limit %s", int(num_pages), limit)
+				error.MESSAGE = errMessg
+				json, err := json.Marshal(error)
+				if err != nil {
+					log.Fatal(err.Error())
+				}
+				w.WriteHeader(error.CODE)
+				w.Write(json)
+
+			} else {
+				json, err := json.Marshal(books)
+				log.Println("[Book-Handler] Length:", len(books))
+
+				if err != nil {
+					log.Fatal(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+
+				w.Write(json)
 			}
 
-			w.Write(json)
 		}
+	}()
+	wg.Wait()
+	// time.Sleep(5 * time.Second)
 
-	}
+	log.Println("[Book-Handler] Total time taken:", time.Since(tick))
 
 }
 
